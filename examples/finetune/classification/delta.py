@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import torch.nn.functional as F
 
-sys.path.append('../../..')
+# sys.path.append('../../..')
 from ftlib.finetune.delta import *
 from common.modules.classifier import Classifier
 import common.vision.datasets as datasets
@@ -79,6 +79,8 @@ def main(args: argparse.Namespace):
         backbone.load_state_dict(pretrained_dict, strict=False)
         backbone_source.load_state_dict(pretrained_dict, strict=False)
     num_classes = train_dataset.num_classes
+    # pretrain residue net head is [2048,1000], while now the finetune head is [2048, 196]
+
     classifier = Classifier(backbone, num_classes).to(device)
     source_classifier = Classifier(backbone_source, head=backbone_source.copy_head(), num_classes=backbone_source.fc.out_features).to(device)
     for param in source_classifier.parameters():
@@ -219,9 +221,10 @@ def calculate_channel_attention(dataset, return_layers, args):
         progress.display(i)
         for layer_id, name in enumerate(tqdm(return_layers)):
             layer = get_attribute(classifier, name)
+            # 对每个layers 的每个输出通道进行mask
             for j in range(layer.out_channels):
                 tmp = classifier.state_dict()[name + '.weight'][j,].clone()
-                classifier.state_dict()[name + '.weight'][j,] = 0.0
+                classifier.state_dict()[name + '.weight'][j,] = 0.0 # mask 第j个our channel
                 outputs, _ = classifier(inputs)
                 loss_1 = criterion(outputs, labels)
                 difference = loss_1 - loss_0

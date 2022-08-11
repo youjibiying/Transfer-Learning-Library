@@ -268,7 +268,7 @@ def convert_model(module, p):
                                          StochNorm2d,
                                          StochNorm3d]):
         if isinstance(module, pth_module):
-            mod = stoch_module(module.num_features, module.eps, module.momentum, module.affine, p)
+            mod = stoch_module(module.num_features, module.eps, module.momentum, module.affine, p=p)
             mod.running_mean = module.running_mean
             mod.running_var = module.running_var
 

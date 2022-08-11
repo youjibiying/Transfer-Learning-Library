@@ -23,11 +23,25 @@ def download(root: str, file_name: str, archive_name: str, url_link: str):
         #     os.remove(os.path.join(root, archive_name))
         try:
             download_and_extract_archive(url_link, download_root=root, filename=archive_name, remove_finished=False)
-        except Exception:
-            print("Fail to download {} from url link {}".format(archive_name, url_link))
-            print('Please check you internet connection or '
-                  "reinstall DALIB by 'pip install --upgrade dalib'")
-            exit(0)
+        except:
+            try:
+                root=f"/apdcephfs/private_jiyingzhang_cq/Tansfer-Learning-Library/examples/finetune/classification/{root}"
+                os.system(f"cd {root}")
+                os.system(f"wget {url_link} -O {root}/{archive_name}")
+                if archive_name.split('.')[-1]=='tgz':
+                    os.system(f"tar -zxvf {root}/{archive_name}")
+                elif archive_name.split('.')[-1]=='zip':
+                    os.system(f"unzip {root}/{archive_name}")
+                else:
+                    print('fail to decompress ',archive_name)
+                    raise
+                os.system(f"rm {root}/{archive_name}")
+
+            except Exception:
+                print("Fail to download {} from url link {}".format(archive_name, url_link))
+                print('Please check you internet connection or '
+                      "reinstall DALIB by 'pip install --upgrade dalib'")
+                exit(0)
 
 
 def check_exits(root: str, file_name: str):
